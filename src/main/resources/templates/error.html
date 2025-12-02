@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} ?: 'Error'">Error</title>
+    <link rel="stylesheet" th:href="@{/css/movies.css}">
+    <style>
+        .error-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+            margin: 20px 0;
+        }
+        .pirate-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        .back-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+        .search-form-container {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-container">
+            <div class="pirate-icon">🏴‍☠️</div>
+            <h1 th:text="${title} ?: 'Arrr! Something went wrong!'">Arrr! Something went wrong!</h1>
+            
+            <div class="error-message">
+                <p th:text="${message} ?: 'Blimey! An unexpected error occurred, matey!'">
+                    Blimey! An unexpected error occurred, matey!
+                </p>
+            </div>
+            
+            <!-- Show search form if this was a search error -->
+            <div th:if="${searchPerformed}" class="search-form-container">
+                <h3>🔍 Try Another Search, Ye Savvy Sailor!</h3>
+                <form action="/movies/search" method="get" class="search-form">
+                    <div class="search-inputs">
+                        <input type="text" 
+                               name="name" 
+                               th:value="${searchName}"
+                               placeholder="Search by movie name, arrr!" 
+                               class="search-input">
+                        <input type="number" 
+                               name="id" 
+                               th:value="${searchId}"
+                               placeholder="Movie ID, matey!" 
+                               class="search-input" 
+                               min="1">
+                        <input type="text" 
+                               name="genre" 
+                               th:value="${searchGenre}"
+                               placeholder="Genre (Drama, Action, etc.)" 
+                               class="search-input">
+                    </div>
+                    <button type="submit" class="search-button">🔍 Search the Seven Seas!</button>
+                </form>
+            </div>
+            
+            <a href="/movies" class="back-button">⚓ Back to All Movies</a>
+        </div>
+    </div>
+</body>
+</html>

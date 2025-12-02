@@ -3,13 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Free Movies This Month</title>
+    <title th:text="${searchPerformed} ? 'Movie Search Results' : 'Free Movies This Month'">Free Movies This Month</title>
     <link rel="stylesheet" th:href="@{/css/movies.css}">
+    <style>
+        .search-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .search-title {
+            color: white;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .search-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            align-items: end;
+        }
+        .search-input-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+        }
+        .search-label {
+            color: white;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        .search-input {
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transform: translateY(-2px);
+        }
+        .search-button {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
+            min-height: 48px;
+        }
+        .search-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(238, 90, 36, 0.6);
+        }
+        .clear-button {
+            padding: 12px 20px;
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 48px;
+        }
+        .clear-button:hover {
+            background: white;
+            color: #667eea;
+        }
+        .search-results-header {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #007bff;
+        }
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            background: #fff3cd;
+            border-radius: 15px;
+            border: 1px solid #ffeaa7;
+            margin: 30px 0;
+        }
+        .no-results-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        .pirate-emoji {
+            font-size: 1.2em;
+        }
+        @media (max-width: 768px) {
+            .search-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-input-group {
+                min-width: auto;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Free Movies This Month</h1>
-        <div class="movies-grid">
+        <!-- Search Form Section -->
+        <div class="search-container">
+            <h2 class="search-title">
+                <span class="pirate-emoji">🏴‍☠️</span> 
+                Ahoy Matey! Search the Treasure Chest of Movies 
+                <span class="pirate-emoji">⚓</span>
+            </h2>
+            <form action="/movies/search" method="get" class="search-form">
+                <div class="search-input-group">
+                    <label class="search-label">🎬 Movie Name</label>
+                    <input type="text" 
+                           name="name" 
+                           th:value="${searchName}"
+                           placeholder="e.g., The Prison Escape" 
+                           class="search-input">
+                </div>
+                <div class="search-input-group">
+                    <label class="search-label">🆔 Movie ID</label>
+                    <input type="number" 
+                           name="id" 
+                           th:value="${searchId}"
+                           placeholder="e.g., 1" 
+                           class="search-input" 
+                           min="1">
+                </div>
+                <div class="search-input-group">
+                    <label class="search-label">🎭 Genre</label>
+                    <input type="text" 
+                           name="genre" 
+                           th:value="${searchGenre}"
+                           placeholder="e.g., Drama, Action" 
+                           class="search-input">
+                </div>
+                <button type="submit" class="search-button">
+                    🔍 Search the Seven Seas!
+                </button>
+                <button type="button" class="clear-button" onclick="clearSearch()">
+                    🧹 Clear Search
+                </button>
+            </form>
+        </div>
+
+        <!-- Results Header -->
+        <div th:if="${searchPerformed}" class="search-results-header">
+            <h2 th:if="${searchResultsCount > 0}">
+                <span class="pirate-emoji">🎉</span> 
+                Shiver me timbers! Found <span th:text="${searchResultsCount}">0</span> treasure(s) matching yer search!
+            </h2>
+            <div th:if="${searchName or searchId or searchGenre}">
+                <p><strong>Search Criteria:</strong></p>
+                <ul style="list-style: none; padding: 0;">
+                    <li th:if="${searchName}">🎬 Name: "<span th:text="${searchName}"></span>"</li>
+                    <li th:if="${searchId}">🆔 ID: <span th:text="${searchId}"></span></li>
+                    <li th:if="${searchGenre}">🎭 Genre: "<span th:text="${searchGenre}"></span>"</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Page Title -->
+        <h1 th:if="${!searchPerformed}">Free Movies This Month</h1>
+
+        <!-- No Results Message -->
+        <div th:if="${searchPerformed and movies.empty}" class="no-results">
+            <div class="no-results-icon">🏴‍☠️</div>
+            <h3>Arrr! No Treasure Found!</h3>
+            <p th:text="${noResultsMessage}">No movies found matching yer search criteria, matey!</p>
+            <p>Try adjusting yer search terms and sail again! 🚢</p>
+        </div>
+
+        <!-- Movies Grid -->
+        <div th:if="${!movies.empty}" class="movies-grid">
             <div class="movie-card" th:each="movie : ${movies}">
                 <div class="movie-icon" th:text="${movie.icon}">🎬</div>
                 <h3 th:text="${movie.movieName}">Movie Title</h3>
@@ -29,6 +209,24 @@
                 <a th:href="@{/movies/{id}/details(id=${movie.id})}" class="details-btn">View Details</a>
             </div>
         </div>
+
+        <!-- Back to All Movies Link -->
+        <div th:if="${searchPerformed}" style="text-align: center; margin-top: 30px;">
+            <a href="/movies" style="display: inline-block; padding: 15px 30px; background: #007bff; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
+                ⚓ Back to All Movies
+            </a>
+        </div>
     </div>
+
+    <script>
+        function clearSearch() {
+            // Clear all search inputs
+            document.querySelectorAll('.search-input').forEach(input => {
+                input.value = '';
+            });
+            // Redirect to show all movies
+            window.location.href = '/movies';
+        }
+    </script>
 </body>
 </html>
